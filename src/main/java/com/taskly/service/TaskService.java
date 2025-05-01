@@ -2,58 +2,73 @@ package com.taskly.service;
 
 import com.taskly.dto.TaskRequest;
 import com.taskly.dto.TaskResponse;
-import com.taskly.exception.TaskNotFoundException;
 import com.taskly.model.Task;
 import com.taskly.repository.TaskRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class TaskService {
 
-	 private final TaskRepository taskRepository;
+    @Autowired
+    private TaskRepository taskRepository;
 
-	    public TaskResponse createTask(TaskRequest taskRequest) {
-	        Task task = new Task();
-	        task.setDescription(taskRequest.description());
-	        task.setStatus(taskRequest.status());
-	        
-	        Task savedTask = taskRepository.save(task);
-	        return new TaskResponse(savedTask.getId(), savedTask.getDescription(), savedTask.getStatus());
-	    }
+    public TaskResponse createTask(TaskRequest taskRequest) {
+        Task task = new Task();
+        task.setDescription(taskRequest.getDescription());
+        task.setStatus(taskRequest.getStatus());
 
-	    public List<TaskResponse> getAllTasks() {
-	        return taskRepository.findAll().stream()
-	                .map(task -> new TaskResponse(task.getId(), task.getDescription(), task.getStatus()))
-	                .toList();
-	    }
+        Task savedTask = taskRepository.save(task);
 
-	    public TaskResponse getTaskById(Long id) {
-	        Task task = taskRepository.findById(id)
-	                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada con id: " + id));
-	        return new TaskResponse(task.getId(), task.getDescription(), task.getStatus());
-	    }
+        return new TaskResponse(savedTask.getId(), savedTask.getDescription(), savedTask.getStatus());
+    }
 
-	    @Transactional
-	    public TaskResponse updateTask(Long id, TaskRequest taskRequest) {
-	        Task task = taskRepository.findById(id)
-	                .orElseThrow(() -> new TaskNotFoundException("Tarea no encontrada con id: " + id));
-	        
-	        task.setDescription(taskRequest.description());
-	        task.setStatus(taskRequest.status());
-	        
-	        return new TaskResponse(task.getId(), task.getDescription(), task.getStatus());
-	    }
+    public List<TaskResponse> getAllTasks() {
+        List<Task> tasks = taskRepository.findAll();
 
-	    public void deleteTask(Long id) {
-	        if (!taskRepository.existsById(id)) {
-	            throw new TaskNotFoundException("Tarea no encontrada con id: " + id);
-	        }
-	        taskRepository.deleteById(id);
-	    }
-	
+        return tasks.stream()
+                .map(task -> new TaskResponse(task.getId(), task.getDescription(), task.getStatus()))
+                .toList();
+    }
+
+    public TaskResponse getTaskById(Long id) {
+        Optional<Task> task = taskRepository.findById(id);
+
+        if (task.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada con id: " + id);
+        }
+
+        return new TaskResponse(task.get().getId(), task.get().getDescription(), task.get().getStatus());
+    }
+
+    public TaskResponse updateTask(Long id, TaskRequest taskRequest) {
+        Optional<Task> task = taskRepository.findById(id);
+
+        if (task.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada con id: " + id);
+        }
+
+        Task existingTask = task.get();
+        existingTask.setDescription(taskRequest.getDescription());
+        existingTask.setStatus(taskRequest.getStatus());
+
+        Task updatedTask = taskRepository.save(existingTask);
+
+        return new TaskResponse(updatedTask.getId(), updatedTask.getDescription(), updatedTask.getStatus());
+    }
+
+    public void deleteTask(Long id) {
+        Optional<Task> task = taskRepository.findById(id);
+
+        if (task.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada con id: " + id);
+        }
+
+        taskRepository.deleteById(id);
+    }
 }
