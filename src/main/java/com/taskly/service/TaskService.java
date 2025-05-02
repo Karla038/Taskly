@@ -20,19 +20,20 @@ public class TaskService {
 
     public TaskResponse createTask(TaskRequest taskRequest) {
         Task task = new Task();
+        task.setTitle(taskRequest.getTitle());
         task.setDescription(taskRequest.getDescription());
         task.setStatus(taskRequest.getStatus());
 
         Task savedTask = taskRepository.save(task);
 
-        return new TaskResponse(savedTask.getId(), savedTask.getDescription(), savedTask.getStatus());
+        return new TaskResponse(savedTask.getId(), savedTask.getTitle(), savedTask.getDescription(), savedTask.getStatus());
     }
 
     public List<TaskResponse> getAllTasks() {
         List<Task> tasks = taskRepository.findAll();
 
         return tasks.stream()
-                .map(task -> new TaskResponse(task.getId(), task.getDescription(), task.getStatus()))
+                .map(task -> new TaskResponse(task.getId(), task.getTitle(), task.getDescription(), task.getStatus()))
                 .toList();
     }
 
@@ -43,7 +44,7 @@ public class TaskService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada con id: " + id);
         }
 
-        return new TaskResponse(task.get().getId(), task.get().getDescription(), task.get().getStatus());
+        return new TaskResponse(task.get().getId(), task.get().getTitle(), task.get().getDescription(), task.get().getStatus());
     }
 
     public TaskResponse updateTask(Long id, TaskRequest taskRequest) {
@@ -54,12 +55,13 @@ public class TaskService {
         }
 
         Task existingTask = task.get();
+        existingTask.setTitle(taskRequest.getTitle());
         existingTask.setDescription(taskRequest.getDescription());
         existingTask.setStatus(taskRequest.getStatus());
 
         Task updatedTask = taskRepository.save(existingTask);
 
-        return new TaskResponse(updatedTask.getId(), updatedTask.getDescription(), updatedTask.getStatus());
+        return new TaskResponse(updatedTask.getId(), updatedTask.getTitle(), updatedTask.getDescription(), updatedTask.getStatus());
     }
 
     public void deleteTask(Long id) {

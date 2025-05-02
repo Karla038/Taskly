@@ -4,12 +4,13 @@ import com.taskly.model.TaskStatus;
 public class TaskResponse {
 
     private Long id;
+    private String title;
     private String description;
     private TaskStatus status;
 
-    // Constructor
-    public TaskResponse(Long id, String description, TaskStatus status) {
+    public TaskResponse(Long id, String title, String description, TaskStatus status) {
         this.id = id;
+        this.title = title;
         this.description = description;
         this.status = status;
     }
@@ -20,6 +21,14 @@ public class TaskResponse {
 
     public void setId(Long id) {
         this.id = id;	
+    }
+    
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {

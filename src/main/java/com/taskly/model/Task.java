@@ -13,6 +13,9 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El titulo no puede estar vacío")
+    private String title;
+    
     @NotBlank(message = "La descripción no puede estar vacía")
     private String description;
 
@@ -22,8 +25,9 @@ public class Task {
 
     public Task() {}
 
-    public Task(Long id, String description, TaskStatus status) {
+    public Task(Long id, String title, String description, TaskStatus status) {
         this.id = id;
+        this.title = title;
         this.description = description;
         this.status = status;
     }
@@ -36,6 +40,14 @@ public class Task {
         this.id = id;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
     public String getDescription() {
         return description;
     }
