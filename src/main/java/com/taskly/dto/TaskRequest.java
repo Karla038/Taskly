@@ -6,15 +6,27 @@ import jakarta.validation.constraints.NotNull;
 
 public class TaskRequest {
 
+	@NotBlank
+    private String title;
+  
     @NotBlank
     private String description;
   
     @NotNull
     private TaskStatus status;
 
-    public TaskRequest(String description, TaskStatus status) {
-        this.description = description;
+    public TaskRequest(String title, String description, TaskStatus status) {
+        this.title = title;
+    	this.description = description;
         this.status = status;
+    }
+    
+    public String getTitle() {
+    	return title;
+    }
+    
+    public void setTitle(String title) {
+    	this.title = title;
     }
 
     public String getDescription() {
